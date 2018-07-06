@@ -1,0 +1,330 @@
+/*******************************************
+Rory Dunne
+10/29/17
+CS2401
+Implementation of the template list class
+********************************************/
+
+/////////////////BIG3/////////////////////////
+
+template <class T>
+dlist<T>::dlist(const T& other) //Copy Constructor
+{
+if (other.head == NULL)
+  {
+    head = NULL;
+  }
+
+  else
+  {
+      Dnode<T>* sptr, *dptr;
+      head = tail = new Dnode<T>(other.head -> data());
+      sptr = other.head -> next();
+      dptr = tail;
+        while(sptr != NULL)
+        {
+          dptr -> set_next(new Dnode<T>(sptr -> data(), dptr));
+          tail = dptr = dptr -> next();
+          sptr = sptr -> next();
+        }
+      delete sptr;
+    }
+  }
+
+
+template <class T>
+dlist<T> dlist<T>::operator = (const T& other) //Overloaded Assignment Operator
+{
+	if(this == other)
+	{
+		return;
+	}
+
+	if(other.head == NULL)
+	{
+		head = NULL;
+	}
+
+	else
+	{
+		Dnode<T>* sptr, *dptr;
+      head = tail = new Dnode<T>(other.head -> data());
+      sptr = other.head -> next();
+      dptr = tail;
+        while(sptr != NULL)
+        {
+          dptr -> set_next(new Dnode<T>(sptr -> data(), dptr));
+          tail = dptr = dptr -> next();
+          sptr = sptr -> next();
+        }
+
+      delete sptr;
+	}
+}
+
+template <class T>
+dlist<T>::~dlist() //Destructor
+{
+	Dnode<T>* rmptr;
+
+  while (head != NULL)
+  {
+    rmptr = head;
+    head = head -> next();
+    delete rmptr;
+  }
+}
+
+/////////////////BIG3/////////////////////////
+
+
+
+////////////////ITERATOR//////////////////////
+
+template <class T>
+void dlist<T>::remove(iterator it)
+{
+
+	if (it.current == NULL)
+	{
+	std::cout << "This is a NULL pointer.";
+	return;
+	}
+
+	if (head == NULL)
+	{	
+	std::cout << "There is no list to remove anything from.\n";
+	return;
+	}
+
+	if (head == it.current)
+	{
+	front_remove();
+	return;
+	}
+
+	if (tail == it.current)
+	{		
+	rear_remove();
+	return;
+	}	
+	
+	if (listcount = 1)
+	{
+		front_remove();	
+	}
+	
+	else
+	{
+	Dnode<T>* tmp, *prev, *next;
+	tmp = it.current;
+	prev = it.current ->previous();
+	next = it.current ->next();
+	prev -> set_next(next);
+	next -> set_previous(prev);
+	it.current = next;
+	delete tmp;
+	}
+--listcount;
+}
+/////////////////////////////////////////////////////////////////////
+
+template <class T>
+void dlist<T>::insert_before(iterator& it, T item)
+{
+
+	Dnode<T>* tmp = it.current; //for holding the node	
+	
+			
+	if (listcount == 1)
+	{
+		front_insert(item);
+		return;	
+	}
+
+	if (it.current == head)
+	{
+		Dnode<T>* cursor = head;
+		it.current = new Dnode<T>(item, NULL, tmp);
+		head = it.current;
+	}
+
+	else
+	{
+	it.current = new Dnode<T>(item, tmp -> previous(), tmp);
+	it.current -> next() -> set_previous(it.current);
+	it.current -> previous() -> set_next(it.current);
+	}
+++listcount;
+}
+/////////////////////////////////////////////////////////////////////
+
+template <class T>
+void dlist<T>::insert_after(iterator& it, T item)
+{
+	Dnode<T>* tmp = it.current;
+	if (listcount == 1)
+	{
+		rear_insert(item);
+		return;	
+	}
+	
+
+	if (it.current == tail)	
+	{
+		rear_insert(item);
+		return;
+	}
+
+	else
+	{
+	it.current = new Dnode<T>(item, it.current, it.current -> next());
+	it.current -> next() -> set_previous(it.current);
+	it.current -> previous() -> set_next(it.current);
+	}
+++listcount;
+}
+
+////////////////ITERATOR//////////////////////
+
+
+
+template <class T>
+void dlist<T>::front_insert(T item)
+{
+ Dnode<T>* cursor = head;
+  if (head == NULL)
+  {
+    std::cout<<"Generating list." << std::endl;
+    head = tail = new Dnode<T>(item);
+    ++listcount;
+  }
+
+  else
+  {
+	head -> set_previous(new Dnode<T>(item, NULL, cursor/*this holds head*/));
+	head = head -> previous();
+	++listcount;  
+  }
+}
+/////////////////////////////////////////////////////////////////////////
+
+template <class T>
+void dlist<T>::front_remove()
+{
+	Dnode<T>* rmptr = head;
+	
+	if (head == tail)
+	{
+		
+		head = tail = NULL;
+		delete rmptr;
+		--listcount;		
+		return;	
+	}
+	
+	if (head == NULL && tail == NULL)
+	{
+		std::cout << "There is no list.";
+		return;
+	}
+	
+	else
+	{	
+		head = head -> next();
+		head -> set_previous(NULL);
+		delete rmptr;
+		--listcount;
+  	}
+
+}
+////////////////////////////////////////////////////////////////////////
+
+template <class T>
+void dlist<T>::rear_insert(T item)
+{
+  if (head == NULL)
+  {
+    std::cout<<"Generating list." << std::endl;
+    head = tail = new Dnode<T>(item);
+    ++listcount;
+  }
+
+  else
+  {
+	tail -> set_next(new Dnode<T>(item, tail));
+	tail = tail->next();
+	++listcount;
+  }
+
+}
+//////////////////////////////////////////////////////////////////////
+
+template <class T>
+void dlist<T>::rear_remove()
+{
+	Dnode<T>* rmptr = tail;
+
+	if (head == tail)
+	{
+		head = tail = NULL;
+		delete rmptr;
+		--listcount;		
+		return;
+	}
+	
+	if (head == NULL)
+	{
+		std::cout << "There is no list.";
+		return;
+	}
+	
+	else
+	{
+		tail = tail -> previous();
+		tail -> set_next(NULL); 
+		delete rmptr;
+		--listcount;
+  	}
+	
+
+
+}
+/////////////////////////////////////////////////////////////////////////
+
+template <class T>
+void dlist<T>::show()
+{
+	  Dnode<T>* cursor = head;
+
+    if (cursor == NULL)
+    {
+      std::cout << "There is no list." << std::endl;
+    }
+
+    while (cursor != NULL)
+    {
+     	   std::cout<<cursor->data() << "\n";
+  	   cursor = cursor->next();
+    }
+}
+/////////////////////////////////////////////////////////////////////////
+
+template <class T>
+void dlist<T>::reverse_show()
+{
+	  Dnode<T>* cursor = tail;
+
+    if (cursor == NULL)
+    {
+      std::cout << "There is no list." << std::endl;
+    }
+
+    while (cursor != NULL)
+    {
+     	   std::cout<<cursor->data() << "\n";
+  	   cursor = cursor->previous();
+    }
+}
+
+
